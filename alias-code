@@ -1,0 +1,40 @@
+embed 
+<drac2>
+target, c, cT, onoff, helptext = name, combat(), "", "&*&", get_gvar("01448c1d-2ab7-4b08-ba04-876f55d9d2fa")
+args = argparse(onoff)
+character().set_cvar_nx("shieldsup", 0)
+bonus = 2+int(shieldsup)
+addac = {"ac_bonus": bonus}
+remac = {"ac_bonus": -bonus}
+if c and c.get_combatant(target):
+    cT = c.get_combatant(target)
+    equipped = cT.get_effect("Shield Equipped")
+    removed = cT.get_effect("Shield Removed")
+    if onoff == "don" and not(removed) :
+        cT.add_effect("Shield Equipped",passive_effects=addac)
+    elif onoff == "don" and removed :
+        cT.remove_effect("Shield Removed")
+    elif onoff == "doff" and equipped :
+        cT.remove_effect("Shield Equipped")
+    elif onoff == "doff" and not(equipped) :
+        cT.add_effect("Shield Removed",passive_effects=remac)
+    equipped = cT.get_effect("Shield Equipped")
+    removed = cT.get_effect("Shield Removed")
+if "set" in onoff :
+    base = "2"
+    if "-ac" in onoff :
+        character().set_cvar("shieldsup", args.last('ac'))
+    else :
+        character().set_cvar("shieldsup", 0)
+
+if c :
+    output = f'-title "{cT.name if cT else target} {"equips" if onoff == "don" else "removes" if onoff == "doff" else "checks"} their shield!" -desc "{"Your current AC is "+cT.ac+"."}"'+(f' -f "{cT.name} |**Effect**: {equipped or removed}|inline"'  if cT else "")+(f' -f "Magic Shield|+{int(shieldsup)}|inline"' if bonus>2 else "")
+else :
+    output = f'-title "{name} needs a shield!" -desc "This alias only functions in combat."'+(f' -f "Magic Shield|+{int(shieldsup)}|inline"' if bonus>2 else "")
+
+
+return output
+</drac2>
+-footer "!shieldsup [don|doff|set] [-ac 0|1|2|3] | Made by Vandelon#3580"
+-thumb {{image}}
+-color {{color}}
